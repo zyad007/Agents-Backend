@@ -196,3 +196,36 @@ export const addBot: RequestHandler<{ id: string }> = async (req, res, next) => 
         res.status(404).send()
     }
 }
+
+export const removeBot: RequestHandler<{ id: string }> = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        let { botId } = req.body;
+
+
+        if (!botId.startsWith('asst_')) {
+            botId = bots.find(x => x.name === botId)?.id;
+        }
+
+        const bot = await openai.beta.assistants.retrieve(botId);
+
+        if (!bot) return res.send(404);
+
+        const chat = await openai.beta.threads.retrieve(id);
+
+        if (!chat) return res.send(404);
+
+        setChats(chats.map(x => {
+            if (x.id === id) {
+                x.bots = x.bots.filter(x => x.id !== botId);
+            }
+            return x;
+        }))
+
+        return res.send();
+
+    }
+    catch (e) {
+        res.status(404).send()
+    }
+}

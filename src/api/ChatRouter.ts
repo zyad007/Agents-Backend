@@ -15,6 +15,8 @@ chatRouter.post('/send/:id/:botId', ChatController.send);
 
 chatRouter.post('/:id/add-bot', ChatController.addBot);
 
+chatRouter.post('/:id/remove-bot', ChatController.addBot);
+
 chatRouter.get('/:id', ChatController.getBots);
 
 export default chatRouter;
