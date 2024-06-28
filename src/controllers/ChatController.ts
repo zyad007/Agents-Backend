@@ -27,17 +27,17 @@ export const send: RequestHandler<{ id: string, botId: string }> = async (req, r
 
         const chat = chats.find(x => x.id);
 
-        if(!chat) {
+        if (!chat) {
             return res.status(404).send('There no chat with this Id');
         }
 
-        if(!chat.bots?.length) {
+        if (!chat.bots?.length) {
             return res.status(404).send('There is no bots in this chat');
         }
 
         const firstBot = chat.bots[0];
 
-        const bot = await openai.beta.assistants.retrieve(firstBot.id);
+        const bot = await openai.beta.assistants.retrieve(botId);
 
         if (!bot) {
             return res.status(404).send('There is no bot with this id');
@@ -178,6 +178,10 @@ export const addBot: RequestHandler<{ id: string }> = async (req, res, next) => 
         const chat = await openai.beta.threads.retrieve(id);
 
         if (!chat) return res.send(404);
+
+        if (chats.find(x => x.id === id)!.bots.filter(y => y.id === botId).length) {
+            return res.status(400).send('Bot already added')
+        }
 
         setChats(chats.map(x => {
             if (x.id === id) {

@@ -3,6 +3,7 @@ import cors from 'cors';
 import chatRouter from "./api/ChatRouter";
 import botRouter from "./api/BotRouter";
 import './openai/opanai'
+import openai from "./openai/opanai";
 
 console.log('ENV:' + process.env.NODE_ENV);
 
@@ -17,6 +18,9 @@ app.use(cors());
 app.use('/chat', chatRouter);
 app.use('/bot', botRouter);
 
+openai.beta.assistants.list().then(x => {
+    console.log(x.data);
+})
 app.listen(port, () => {
     console.log('Server listening on port: ' + port);
 })

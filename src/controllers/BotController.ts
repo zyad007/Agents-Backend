@@ -1,11 +1,14 @@
 import { RequestHandler } from "express";
-import openai, { bots } from "../openai/opanai";
+import openai, { bots, chats, setChats } from "../openai/opanai";
 import OpenAI from "openai";
 import { Bot } from "../types/Bot";
 
-export const getAll: RequestHandler = (req, res, next) => {
+export const getAll: RequestHandler = async (req, res, next) => {
     try {
-        res.send(bots)
+        res.send((await openai.beta.assistants.list()).data.map(x => {
+            x.id,
+            x.name
+        }))
     }
     catch (e) {
         next(e)
@@ -51,6 +54,15 @@ export const del: RequestHandler<{ id: string }> = async (req, res, next) => {
         if (!bot) return res.status(404).send();
 
         await openai.beta.assistants.del(id);
+
+        const newChats = chats.map(x => ({
+            ...x,
+            bots: x.bots.filter(z => z.id !== id)
+        }))
+
+        setChats(
+            newChats           
+        )
 
         return res.send()
     }
