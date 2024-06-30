@@ -201,15 +201,9 @@ export const addBot: RequestHandler<{ id: string }> = async (req, res, next) => 
     }
 }
 
-export const removeBot: RequestHandler<{ id: string }> = async (req, res, next) => {
+export const removeBot: RequestHandler<{ id: string, botId: string }> = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        let { botId } = req.body;
-
-
-        if (!botId.startsWith('asst_')) {
-            botId = bots.find(x => x.name === botId)?.id;
-        }
+        const { id, botId } = req.params;
 
         const bot = await openai.beta.assistants.retrieve(botId);
 

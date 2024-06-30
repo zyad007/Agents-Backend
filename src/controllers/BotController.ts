@@ -19,10 +19,10 @@ export const getAllForChat: RequestHandler<{id: string}> = async (req, res, next
     const {id} = req.params;
     try {
 
-        const botsIdIn = chats.find(x => x.id)!.bots.map(x => x.id).join();
+        const botsIdIn = chats.find(x => x.id)?.bots.map(x => x.id).join();
 
         res.send((await openai.beta.assistants.list({ limit: 100, order: 'desc' })).data
-        .filter(x => !botsIdIn.includes(x.id))
+        .filter(x => !botsIdIn?.includes(x.id))
         .map(x => ({
             name: x.name,
             id: x.id
