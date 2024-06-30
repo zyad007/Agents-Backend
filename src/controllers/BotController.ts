@@ -5,10 +5,10 @@ import { Bot } from "../types/Bot";
 
 export const getAll: RequestHandler = async (req, res, next) => {
     try {
-        res.send((await openai.beta.assistants.list()).data.map(x => {
-            x.id,
-            x.name
-        }))
+        res.send((await openai.beta.assistants.list({limit:100, order:'desc'})).data.map(x => ({
+            name: x.name,
+            id: x.id
+        })))
     }
     catch (e) {
         next(e)
