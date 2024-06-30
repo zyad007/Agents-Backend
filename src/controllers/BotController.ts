@@ -5,7 +5,7 @@ import { Bot } from "../types/Bot";
 
 export const getAll: RequestHandler = async (req, res, next) => {
     try {
-        res.send((await openai.beta.assistants.list({limit:100, order:'desc'})).data.map(x => ({
+        res.send((await openai.beta.assistants.list({ limit: 100, order: 'desc' })).data.map(x => ({
             name: x.name,
             id: x.id
         })))
@@ -14,6 +14,66 @@ export const getAll: RequestHandler = async (req, res, next) => {
         next(e)
     }
 }
+
+export const getAllForChat: RequestHandler<{id: string}> = async (req, res, next) => {
+    const {id} = req.params;
+    try {
+
+        const botsIdIn = chats.find(x => x.id)!.bots.map(x => x.id).join();
+
+        res.send((await openai.beta.assistants.list({ limit: 100, order: 'desc' })).data
+        .filter(x => !botsIdIn.includes(x.id))
+        .map(x => ({
+            name: x.name,
+            id: x.id
+        })))
+    }
+    catch (e) {
+        next(e)
+    }
+}
+
+
+export const get: RequestHandler<{id: string}> = async (req, res, next) => {
+    const {id} = req.params;
+    try {
+
+        const bot = (await openai.beta.assistants.retrieve(id));
+
+        if(!bot) return res.status(404).send('No bot with this id');
+
+        res.send({
+            name: bot.name,
+            instructions: bot.instructions
+        })
+    }
+    catch (e) {
+        next(e)
+    }
+}
+
+
+export const edit: RequestHandler<{id: string}> = async (req, res, next) => {
+    const {id} = req.params;
+    const {name, instruction} =  req.body
+    try {
+
+        const bot = (await openai.beta.assistants.retrieve(id));
+
+        if(!bot) return res.status(404).send('No bot with this id');
+
+        await openai.beta.assistants.update(id, {
+            name,
+            instructions: instruction
+        })
+
+        res.send();
+    }
+    catch (e) {
+        next(e)
+    }
+}
+
 
 export const create: RequestHandler = async (req, res, next) => {
     try {
@@ -61,7 +121,7 @@ export const del: RequestHandler<{ id: string }> = async (req, res, next) => {
         }))
 
         setChats(
-            newChats           
+            newChats
         )
 
         return res.send()
